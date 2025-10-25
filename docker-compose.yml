@@ -1,0 +1,56 @@
+services:
+  db:
+    image: postgres:16
+    container_name: linkly-db
+    environment:
+      POSTGRES_DB: linkly
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - linkly_db_data:/var/lib/postgresql/data
+
+  analyticsdb:
+    image: postgres:16
+    container_name: linkly-analytics-db
+    environment:
+      POSTGRES_DB: linkly_analytics
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - linkly_analytics_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: linkly-redis
+    ports:
+      - "6379:6379"
+
+  app:
+    build: .
+    container_name: linkly-app
+    depends_on:
+      - db
+      - analyticsdb
+      - redis
+    environment:
+      JDBC_URL: ${JDBC_URL:-jdbc:postgresql://db:5432/linkly}
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      ANALYTICS_JDBC_URL: ${ANALYTICS_JDBC_URL:-jdbc:postgresql://analyticsdb:5432/linkly_analytics}
+      ANALYTICS_DB_USERNAME: ${ANALYTICS_DB_USERNAME:-postgres}
+      ANALYTICS_DB_PASSWORD: ${ANALYTICS_DB_PASSWORD:-postgres}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-default}
+    ports:
+      - "8080:8080"
+
+volumes:
+  linkly_db_data:
+  linkly_analytics_data:
+
+

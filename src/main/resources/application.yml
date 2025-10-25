@@ -1,0 +1,80 @@
+spring:
+  application:
+    name: linkly-shortener
+  datasource:
+    url: ${JDBC_URL:jdbc:postgresql://localhost:5433/linkly}
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  cache:
+    type: redis
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+server:
+  port: 8080
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    io.linkly.shortener: INFO
+  file:
+    name: logs/linkly-shortener.log
+
+analytics:
+  datasource:
+    url: ${ANALYTICS_JDBC_URL:jdbc:postgresql://localhost:5434/linkly_analytics}
+    driver-class-name: org.postgresql.Driver
+    username: ${ANALYTICS_DB_USERNAME:postgres}
+    password: ${ANALYTICS_DB_PASSWORD:postgres}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: ${JDBC_URL:jdbc:postgresql://localhost:5432/linkly}
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: update
+  cache:
+    type: redis
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+analytics:
+  datasource:
+    url: ${ANALYTICS_JDBC_URL:jdbc:postgresql://localhost:5432/linkly_analytics}
+    driver-class-name: org.postgresql.Driver
+    username: ${ANALYTICS_DB_USERNAME:postgres}
+    password: ${ANALYTICS_DB_PASSWORD:postgres}
+
+server:
+  port: ${PORT:8080}
+
