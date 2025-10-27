@@ -58,10 +58,7 @@ public class UrlController {
         log.info("GET /s/{}", code);
         return urlService.resolve(code)
                 .map(url -> {
-                    String ip = request.getHeader("X-Forwarded-For");
-                    if (ip == null || ip.isBlank()) {
-                        ip = request.getRemoteAddr();
-                    }
+                    String ip = resolveClientIp(request);
                     String ua = request.getHeader("User-Agent");
                     String referer = request.getHeader("Referer");
                     analyticsService.recordHit(code, ip, ua, referer);
@@ -70,6 +67,21 @@ public class UrlController {
                         .build();
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    private String resolveClientIp(jakarta.servlet.http.HttpServletRequest request) {
+        String xff = request.getHeader("X-Forwarded-For");
+        if (xff != null && !xff.isBlank()) {
+            String first = xff.split(",")[0].trim();
+            if (!first.isEmpty() && !"unknown".equalsIgnoreCase(first)) {
+                return first;
+            }
+        }
+        String xReal = request.getHeader("X-Real-IP");
+        if (xReal != null && !xReal.isBlank() && !"unknown".equalsIgnoreCase(xReal)) {
+            return xReal.trim();
+        }
+        return request.getRemoteAddr();
     }
 }
 
