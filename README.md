@@ -196,6 +196,13 @@ SERVER_PORT=8081 java -jar target/linkly-shortener-0.0.1-SNAPSHOT.jar
 
 ---
 
+### Client IP caveat (Docker on macOS) 🧭
+When running via Docker Desktop on macOS, all requests may appear from `192.168.65.1` due to NAT. To capture the real client IP:
+- Put a reverse proxy (nginx/Traefik/load balancer) in front that sets `X-Forwarded-For`/`X-Real-IP` headers
+- Or tunnel through a service like ngrok/cloudflared which adds these headers
+- Or run on Linux where Docker can preserve the source IP
+
+
 ## Future scope 🚀
 - Kafka-based analytics queueing to decouple writes and smooth spikes.
   - Dev: add a single-broker Kafka to docker-compose and set:
